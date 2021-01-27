@@ -13,4 +13,4 @@ class User(AbstractUser):
     )
 
     def get_user_name(self):
-        return self.Username
+        return self.username
