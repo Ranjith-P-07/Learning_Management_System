@@ -21,21 +21,13 @@ class Mentor(models.Model):
 
 
 class Student(models.Model):
-    year_of_experience = (
-        (0, 0),
-        (1, 1),
-        (2, 2),
-        (3, 3),
-        (4, 4),
-        (5, 5),
-    )
     student = models.OneToOneField(User, on_delete=models.CASCADE)
     alternate_number = models.CharField(max_length=13, default=None, null=True, blank=True)
     Relationship_with_alternate_contact_person = models.CharField(max_length=50, default=None, null=True, blank=True)
     current_location = models.CharField(max_length=50, default=None, null=True, blank=True)
     current_address = models.CharField(max_length=50, default=None, null=True, blank=True)
     git_link = models.CharField(max_length=30, default=None, null=True, blank=True)
-    year_of_experience = models.IntegerField(choices=year_of_experience, default=None, null=True)
+    year_of_experience = models.FloatField(default=0, max_length=2)
 
     def __str__(self):
         return self.student.get_user_name()
@@ -52,6 +44,12 @@ class Education(models.Model):
 
     def __str__(self):
         return self.student.student.get_user_name()
+
+
+class StudentCourseMentor(models.Model):
+    student = models.OneToOneField(Student, on_delete=models.CASCADE)
+    course = models.OneToOneField(Course, on_delete=models.SET_NULL, null=True)
+    mentor = models.OneToOneField(Mentor, on_delete=models.SET_NULL, null=True)
 
 
 class Performance(models.Model):
