@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'Register.apps.RegisterConfig',
     'Management.apps.ManagementConfig',
     'drf_yasg',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
