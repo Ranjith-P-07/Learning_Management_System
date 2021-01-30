@@ -9,7 +9,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email', 'mobile_number', 'role', 'password', 'confirm_password']
+        fields = ['username', 'first_name', 'last_name', 'email', 'mobile_number', 'role', 'password',
+                  'confirm_password']
 
     def validate(self, data):
         if User.objects.filter(email=data['email']).exists():
@@ -22,9 +23,22 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('confirm_password')
         user = User.objects.create(**validated_data)
+        user.is_active = False
         return user
 
 
 class UserLoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=10, required=True)
     password = serializers.CharField(max_length=15, required=True)
+
+
+class EmailSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email']
+
+
+class ResetSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['password']
