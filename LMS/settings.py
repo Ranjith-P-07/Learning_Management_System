@@ -9,9 +9,16 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
+import os, logging
 from pathlib import Path
 from decouple import config
+
+# #Logging
+log_filename = "logs/LMS.log"
+os.makedirs(os.path.dirname(log_filename), exist_ok=True)
+formatter = logging.Formatter('%(levelname)s :%(asctime)s :%(pathname)s :%(lineno)s :%(message)s')
+file_handler = logging.FileHandler(filename=log_filename)
+file_handler.setFormatter(formatter)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -43,6 +50,7 @@ INSTALLED_APPS = [
     'Management.apps.ManagementConfig',
     'drf_yasg',
     'rest_framework',
+    'django_short_url',
 ]
 
 MIDDLEWARE = [
