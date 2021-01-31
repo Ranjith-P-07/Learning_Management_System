@@ -1,11 +1,11 @@
-from django.contrib import messages
 from .models import User
 from django.core.validators import validate_email
 from django.shortcuts import render, redirect
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
-from .serializers import UserRegistrationSerializer, UserLoginSerializer, EmailSerializers, ResetSerializers
+from .serializers import UserRegistrationSerializer, UserLoginSerializer, EmailSerializers, ResetSerializers, \
+    ChangeUserPasswordSerializer
 from django.contrib.auth import authenticate, login, logout
 from .permissions import Admin_validate
 from django.contrib.sites.shortcuts import get_current_site
@@ -13,8 +13,9 @@ from .token import token_activation
 from django_short_url.views import get_surl
 from django_short_url.models import ShortURL
 import jwt
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from LMS import settings
-import sys
 
 import logging
 from LMS.settings import file_handler
@@ -23,10 +24,15 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(file_handler)
 
+import sys
+
 sys.path.append('..')
 from LMS.EmailConf import Email
 
+from django.contrib.auth.hashers import check_password
 
+
+@method_decorator(login_required(login_url='/user/login/'), name='dispatch')
 class UserRegistrationView(GenericAPIView):
     serializer_class = UserRegistrationSerializer
     permission_classes = (Admin_validate,)
@@ -46,32 +52,12 @@ class UserRegistrationView(GenericAPIView):
             'role': request.data['role'],
             'email': request.data['email'],
             'domain': get_current_site(request).domain,
-            # 'surl': short_token[2]
         }
         Email.sendEmail(Email.addingMailBodyForRegister(data))
         logger.info("Email has been sent..!!, from post()")
         return Response({
             'response': f"Hello {request.data['username']} you were added as a {request.data['role']},Check your mail for verification"},
             status=status.HTTP_201_CREATED)
-
-
-# def changePassword(request, surl):
-#     try:
-#         tokenobject = ShortURL.objects.get(surl=surl)
-#         token = tokenobject.lurl
-#         decode = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
-#         username = decode['username']
-#         user = User.objects.get(username=username)
-#         if user is not None:
-#             user.is_active = True
-#             user.save()
-#             return redirect('login')
-#         else:
-#             return Response('not valid user')
-#     except KeyError as e:
-#         return Response(e)
-#     except Exception as f:
-#         return Response(f)
 
 
 class UserLoginView(GenericAPIView):
@@ -88,6 +74,11 @@ class UserLoginView(GenericAPIView):
         password = serializer.data.get('password')
         user = authenticate(request, username=username, password=password)
         if user:
+            if user.is_first_time_login:
+                login(request, user)
+                return Response(
+                    {'response': 'You are logged in! Now you need to change password to access other Functions'},
+                    status=status.HTTP_200_OK)
             login(request, user)
             logger.info("Logged in successfully, from post()")
             return Response({'response': 'You are successfully logged in'}, status=status.HTTP_200_OK)
@@ -95,6 +86,7 @@ class UserLoginView(GenericAPIView):
         return Response({'response': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
+@method_decorator(login_required(login_url='/user/login/'), name='dispatch')
 class UserLogoutView(GenericAPIView):
     """
         This api is for user log out
@@ -110,6 +102,28 @@ class UserLogoutView(GenericAPIView):
         except Exception:
             logger.error('something went wrong while logout')
             return Response({'details': 'something went wrong while logout'}, status=status.HTTP_403_FORBIDDEN)
+
+
+@method_decorator(login_required(login_url='/user/login/'), name='dispatch')
+class ChangePassword(GenericAPIView):
+    serializer_class = ChangeUserPasswordSerializer
+
+    def put(self, request):
+        """This API is used to change user password
+        @request_parms = old password, new password and confirm password
+        @rtype: saves new password in database
+        """
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_data = request.user
+        user = User.objects.get(id=user_data.id)
+        old_password = serializer.data.get('old_password')
+        if check_password(old_password, request.user.password):
+            user.set_password(raw_password=serializer.data.get('new_password'))
+            user.is_first_time_login = False
+            user.save()
+            return Response({'response': 'Your password is changed successfully!'}, status=status.HTTP_200_OK)
+        return Response({'response': 'Old password does not match!'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class ForgotPasswordView(GenericAPIView):
