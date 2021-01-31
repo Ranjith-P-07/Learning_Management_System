@@ -9,8 +9,8 @@ class User(AbstractUser):
             ('Mentor', 'Mentor'),
             ('Student', 'Student'),
             ('Admin', 'Admin')
-        ), max_length=20
-    )
+        ), max_length=20)
+    is_first_time_login = models.BooleanField(default=True)
 
     def get_user_name(self):
         return self.username
