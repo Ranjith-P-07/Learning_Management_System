@@ -7,5 +7,6 @@ urlpatterns = [
     path('logout/', views.UserLogoutView.as_view(), name='logout'),
     path('forgotpassword/', views.ForgotPasswordView.as_view(), name='forgotpassword'),
     path('resetpassword/<surl>/', views.ResetPassword.as_view(), name="resetpassword"),
-    path('change_password/', views.ChangePassword.as_view(), name='change_password'),
+    path('change_password/<surl>/', views.ChangePasswordForFirstAccess.as_view(), name='change_password'),
+    path('changepassword/', views.ChangePassword.as_view(), name='changepassword'),
 ]
