@@ -14,3 +14,9 @@ class User(AbstractUser):
 
     def get_user_name(self):
         return self.username
+
+    def get_mobile_number(self):
+        return self.mobile_number
+
+    def get_email(self):
+        return self.email

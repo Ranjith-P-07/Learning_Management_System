@@ -152,7 +152,7 @@ class ForgotPasswordView(GenericAPIView):
                 validate_email(email)
             except Exception:
                 logger.error('not a valid email')
-                return Response({'details': 'not a valid email'})
+                return Response({'response_msg': 'not a valid email'}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 user = User.objects.get(email=email)
                 if user:
@@ -169,9 +169,9 @@ class ForgotPasswordView(GenericAPIView):
                     logger.info('please check your email,link has sent your email, from forgotpassword')
                     return Response({'details': 'please check your email,link has sent your email'},
                                     status=status.HTTP_200_OK)
-            except Exception as e:
+            except User.DoesNotExist:
                 logger.error('something went wrong')
-                return Response(e)
+                return Response({'response_msg':'User DoesnotExist'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class ResetPassword(GenericAPIView):
