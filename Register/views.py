@@ -46,12 +46,17 @@ class UserRegistrationView(GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        token = token_activation(username=request.data['username'], password=request.data['password'])
+        url = str(token)
+        surl = get_surl(url)
+        short_token = surl.split('/')
         data = {
             'username': request.data['username'],
             'password': request.data['password'],
             'role': request.data['role'],
             'email': request.data['email'],
             'domain': get_current_site(request).domain,
+            'token': short_token[2],
         }
         Email.sendEmail(Email.addingMailBodyForRegister(data))
         logger.info("Email has been sent..!!, from post()")
@@ -77,7 +82,7 @@ class UserLoginView(GenericAPIView):
             if user.is_first_time_login:
                 login(request, user)
                 return Response(
-                    {'response': 'You are logged in! Now you need to change password to access other Functions'},
+                    {'response': 'You are logged in! Now you need to change password by using token to access other Functions'},
                     status=status.HTTP_200_OK)
             login(request, user)
             logger.info("Logged in successfully, from post()")
@@ -105,10 +110,10 @@ class UserLogoutView(GenericAPIView):
 
 
 @method_decorator(login_required(login_url='/user/login/'), name='dispatch')
-class ChangePassword(GenericAPIView):
+class ChangePasswordForFirstAccess(GenericAPIView):
     serializer_class = ChangeUserPasswordSerializer
 
-    def put(self, request):
+    def put(self, request, surl):
         """This API is used to change user password
         @request_parms = old password, new password and confirm password
         @rtype: saves new password in database
@@ -117,13 +122,20 @@ class ChangePassword(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user_data = request.user
         user = User.objects.get(id=user_data.id)
-        old_password = serializer.data.get('old_password')
-        if check_password(old_password, request.user.password):
-            user.set_password(raw_password=serializer.data.get('new_password'))
-            user.is_first_time_login = False
-            user.save()
-            return Response({'response': 'Your password is changed successfully!'}, status=status.HTTP_200_OK)
-        return Response({'response': 'Old password does not match!'}, status=status.HTTP_401_UNAUTHORIZED)
+        username = request.user.username
+        tokenobject = ShortURL.objects.get(surl=surl)
+        token = tokenobject.lurl
+        decoded = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
+        decoded_username = decoded['username']
+        if username == decoded_username:
+            old_password = serializer.data.get('old_password')
+            if check_password(old_password, request.user.password):
+                user.set_password(raw_password=serializer.data.get('new_password'))
+                user.is_first_time_login = False
+                user.save()
+                return Response({'response': 'Your password is changed successfully!, Now You can access your Resources'}, status=status.HTTP_200_OK)
+            return Response({'response': 'Old password does not match!'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'response': 'Invalid token..!!'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class ForgotPasswordView(GenericAPIView):
@@ -143,7 +155,6 @@ class ForgotPasswordView(GenericAPIView):
                 return Response({'details': 'not a valid email'})
             try:
                 user = User.objects.get(email=email)
-                print(user)
                 if user:
                     token = token_activation(username=user.username, password=user.password)
                     url = str(token)
@@ -199,3 +210,25 @@ class ResetPassword(GenericAPIView):
                     return Response({'details': 'not a valid user'})
         except Exception:
             return Response({'response': "Invalid token"})
+
+
+@method_decorator(login_required(login_url='/user/login/'), name='dispatch')
+class ChangePassword(GenericAPIView):
+    serializer_class = ChangeUserPasswordSerializer
+
+    def put(self, request):
+        """This API is used to change user password
+        @request_parms = old password, new password and confirm password
+        @rtype: saves new password in database
+        """
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_data = request.user
+        user = User.objects.get(id=user_data.id)
+        old_password = serializer.data.get('old_password')
+        if check_password(old_password, request.user.password):
+            user.set_password(raw_password=serializer.data.get('new_password'))
+            user.is_first_time_login = False
+            user.save()
+            return Response({'response': 'Your password is changed successfully!'}, status=status.HTTP_200_OK)
+        return Response({'response': 'Old password does not match!'}, status=status.HTTP_401_UNAUTHORIZED)
