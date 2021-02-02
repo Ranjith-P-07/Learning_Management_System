@@ -6,7 +6,10 @@ from Register.models import User
 
 
 class Course(models.Model):
-    course_name = models.CharField(max_length=20, unique=True)
+    course_name = models.CharField(max_length=50, unique=True)
+    course_price = models.IntegerField(default=0)
+    Duration = models.CharField(max_length=10, default=None)
+    Description = models.CharField(max_length=150, default=None, null=True, blank=True)
 
     def __str__(self):
         return self.course_name
