@@ -13,13 +13,16 @@ class AuthenticationAPITest(TestCase):
     def setUp(self):
         # initialize the APIClient app
         self.client = Client()
-        user1 = User.objects.create(username='Ranjith', email='ranjithroy705@gmail.com',
-                                    password='pbkdf2_sha256$216000$0gRtmSAKA8eg$LDXyQf0Tm5gnznV6IadBVqE6KURr90Xd1wq0drhlq0g=',
-                                    is_superuser=True, role='Admin')
+        Admin_user = User.objects.create(username='Ranjith', email='ranjithroy705@gmail.com', password='pbkdf2_sha256$216000$0gRtmSAKA8eg$LDXyQf0Tm5gnznV6IadBVqE6KURr90Xd1wq0drhlq0g=', is_superuser=True, role='Admin', is_first_time_login=False)
+        Student_user = User.objects.create(username='Rahul', email='bridgelabz123@gmail.com', password='pbkdf2_sha256$216000$dxFUyQK7DrPx$GC/iFmwqXqcboPyNGFMhot0OqoOBbJlfvjiHY8CVwF0=', role='Student', is_first_time_login=True)
 
         self.valid_payload_user1 = {
             'username': 'Ranjith',
             'password': '7353469961',
+        }
+        self.valid_payload_user2 = {
+            'username': 'Rahul',
+            'password': '1234567',
         }
 
         self.invalid_credentials = {
@@ -102,7 +105,7 @@ class AuthenticationAPITest(TestCase):
         response = self.client.post(reverse('forgotpassword'), data=email, content_type='application/json')
         self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_change_password_api_with_valid_credentials(self):
+    def test_change_password_api_after_login_with_valid_credentials(self):
         self.client.post(reverse('login'), data=json.dumps(self.valid_payload_user1), content_type=CONTENT_TYPE)
         data = json.dumps({
           "old_password": "7353469961",
@@ -112,15 +115,28 @@ class AuthenticationAPITest(TestCase):
         response = self.client.put(reverse('changepassword'), data=data, content_type='application/json')
         self.assertEquals(response.status_code, status.HTTP_200_OK)
 
-    def test_change_password_api_with_invalid_credentials(self):
+    def test_change_password_api_after_login_invalid_credentials(self):
         self.client.post(reverse('login'), data=json.dumps(self.valid_payload_user1), content_type=CONTENT_TYPE)
         data = json.dumps({
-          "old_password": "vgdhdery",
-          "new_password": "string",
-          "confirm_password": "string"
+          "old_password": "resrere",
+          "new_password": "123123",
+          "confirm_password": "123123"
         })
         response = self.client.put(reverse('changepassword'), data=data, content_type='application/json')
         self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_change_password_api_after_login_with_valid_credentials_but_with_First_login(self):
+        self.client.post(reverse('login'), data=json.dumps(self.valid_payload_user2), content_type=CONTENT_TYPE)
+        data = json.dumps({
+          "old_password": "123456",
+          "new_password": "123123",
+          "confirm_password": "123123"
+        })
+        response = self.client.put(reverse('changepassword'), data=data, content_type='application/json')
+        self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+
 
 
 
