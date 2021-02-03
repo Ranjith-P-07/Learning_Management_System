@@ -82,7 +82,7 @@ class UserLoginView(GenericAPIView):
             if user.is_first_time_login:
                 login(request, user)
                 return Response(
-                    {'response': 'You are logged in! Now you need to change password by using token to access other Functions'},
+                    {'response': 'You are logged in! If you are a student/Mentor you need to change password by using token to access other Functions'},
                     status=status.HTTP_200_OK)
             login(request, user)
             logger.info("Logged in successfully, from post()")
@@ -221,14 +221,16 @@ class ChangePassword(GenericAPIView):
         @request_parms = old password, new password and confirm password
         @rtype: saves new password in database
         """
+
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         user_data = request.user
         user = User.objects.get(id=user_data.id)
         old_password = serializer.data.get('old_password')
-        if check_password(old_password, request.user.password):
-            user.set_password(raw_password=serializer.data.get('new_password'))
-            user.is_first_time_login = False
-            user.save()
-            return Response({'response': 'Your password is changed successfully!'}, status=status.HTTP_200_OK)
-        return Response({'response': 'Old password does not match!'}, status=status.HTTP_401_UNAUTHORIZED)
+        if not user.is_first_time_login:
+            if check_password(old_password, request.user.password):
+                user.set_password(raw_password=serializer.data.get('new_password'))
+                user.save()
+                return Response({'response': 'Your password is changed successfully!'}, status=status.HTTP_200_OK)
+            return Response({'response': 'Old password does not match! '}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'response': 'if your are a first login user change password by using token which is sent to your mail'}, status=status.HTTP_401_UNAUTHORIZED)
