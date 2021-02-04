@@ -34,6 +34,7 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = []
+AUTH_USER_MODEL = 'Register.User'
 
 
 # Application definition
@@ -89,12 +90,12 @@ WSGI_APPLICATION = 'LMS.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'lms',
-        'USER': 'ranjit',
-        'PASSWORD': 'testing1234',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'ENGINE': config('DATABASE_BACKEND'),
+        'NAME': config('DATABASE_NAME'),
+        'USER': config('DATABASE_USER_NAME'),
+        'PASSWORD': config('DATABASE_PASSWORD'),
+        'HOST': config('DATABASE_HOST_NAME'),
+        'PORT': config('DATABASE_PORT_NO'),
     }
 
 }
@@ -141,9 +142,9 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR,'media')  #DIRECTORY WHERE UPLOADED FILE SAVE
 MEDIA_URL = '/media/'
 
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = config('EMAIL_HOST_SERVER')
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-EMAIL_PORT = 587
+EMAIL_PORT = config('EMAIL_PORT_ID')
 EMAIL_USE_TLS = True
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = config('EMAIL_BACKEND')
