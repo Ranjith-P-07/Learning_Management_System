@@ -27,8 +27,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserLoginSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=10, required=True)
-    password = serializers.CharField(max_length=15, required=True)
+    username = serializers.CharField(min_length=2, max_length=10, required=True)
+    password = serializers.CharField(min_length=2, max_length=15, required=True)
 
 
 class EmailSerializers(serializers.ModelSerializer):
@@ -38,6 +38,8 @@ class EmailSerializers(serializers.ModelSerializer):
 
 
 class ResetSerializers(serializers.ModelSerializer):
+    password = serializers.CharField(max_length=15, min_length=4)
+
     class Meta:
         model = User
         fields = ['password']
