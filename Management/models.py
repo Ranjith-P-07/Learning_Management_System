@@ -39,9 +39,9 @@ class Student(models.Model):
 
 class Education(models.Model):
     student = models.OneToOneField(Student, on_delete=models.CASCADE)
-    institute = models.CharField(max_length=50, default=None, blank=True)
-    degree = models.CharField(max_length=50, default=None, blank=True)
-    stream = models.CharField(max_length=50, default=None, blank=True)
+    institute = models.CharField(max_length=50, default=None, null=True, blank=True)
+    degree = models.CharField(max_length=50, default=None, null=True, blank=True)
+    stream = models.CharField(max_length=50, default=None, null=True, blank=True)
     percentage = models.FloatField(default=None, null=True, blank=True)
     from_date = models.DateField(default=None, blank=True, null=True)
     till = models.DateField(default=None, blank=True, null=True)
