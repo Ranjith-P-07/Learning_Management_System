@@ -13,8 +13,8 @@ class AuthenticationAPITest(TestCase):
     def setUp(self):
         # initialize the APIClient app
         self.client = Client()
-        Admin_user = User.objects.create(username='Ranjith', email='ranjithroy705@gmail.com', password='pbkdf2_sha256$216000$0gRtmSAKA8eg$LDXyQf0Tm5gnznV6IadBVqE6KURr90Xd1wq0drhlq0g=', is_superuser=True, role='Admin', is_first_time_login=False)
-        Student_user = User.objects.create(username='Rahul', email='bridgelabz123@gmail.com', password='pbkdf2_sha256$216000$dxFUyQK7DrPx$GC/iFmwqXqcboPyNGFMhot0OqoOBbJlfvjiHY8CVwF0=', role='Student', is_first_time_login=True)
+        Admin_user = User.objects.create(username='Ranjith', email='ranjithroy705@gmail.com', password='pbkdf2_sha256$216000$eZLcguQIq8IX$zn2liT2NYec6bXOFsfkJotNPreSRT5aTL0dGJZz82Ks=', is_superuser=True, role='Admin', is_first_time_login=False)
+        Student_user = User.objects.create(username='Rahul', email='bridgelabz123@gmail.com', password='pbkdf2_sha256$216000$pZoL1VqVYP4i$J+5DVL84EoWYGz+15lDjxKaVuEegTOWL2EY1X0r1llQ=', role='Student', is_first_time_login=True)
 
         self.valid_payload_user1 = {
             'username': 'Ranjith',
@@ -22,7 +22,7 @@ class AuthenticationAPITest(TestCase):
         }
         self.valid_payload_user2 = {
             'username': 'Rahul',
-            'password': '1234567',
+            'password': '123456',
         }
 
         self.invalid_credentials = {
