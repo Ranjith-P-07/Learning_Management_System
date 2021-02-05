@@ -1,5 +1,7 @@
 from rest_framework import permissions
 
+SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
+
 
 class Admin_validate(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -8,15 +10,17 @@ class Admin_validate(permissions.BasePermission):
 
 class Mentor_validate(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.role == 'Mentor'
-
-
-class IsMentorAdmin(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return request.user.role == 'Mentor' or request.user.role == 'Admin'
+        if request.method in SAFE_METHODS:
+            return request.user.role == 'Mentor' or request.user.role == 'Admin'
+        else:
+            return request.user.role == 'Mentor'
 
 
 class Student_validate(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.role == 'Student'
+        if request.method in SAFE_METHODS:
+            return request.user.role == 'Admin' or request.user.role == 'Mentor' or request.user.role == 'Student'
+        else:
+            return request.user.role == 'Student'
+
 
