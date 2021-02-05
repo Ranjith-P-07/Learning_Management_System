@@ -6,6 +6,9 @@ from Register.models import User
 
 
 class Course(models.Model):
+    """
+        This model is used to create course table with below fields
+    """
     course_name = models.CharField(max_length=50, unique=True)
     course_price = models.IntegerField(default=0)
     Duration = models.CharField(max_length=10, default=None)
@@ -14,16 +17,34 @@ class Course(models.Model):
     def __str__(self):
         return self.course_name
 
+    def get_course_price(self):
+        return self.course_price
+
+    def get_course_duration(self):
+        return self.Duration
+
+    def get_course_description(self):
+        return self.Description
+
 
 class Mentor(models.Model):
+    """
+        This model is used to create mentor table with below fields
+    """
     mentor = models.OneToOneField(User, on_delete=models.CASCADE)
     course = models.ManyToManyField(to=Course, blank=True)
 
     def __str__(self):
         return self.mentor.get_user_name()
 
+    def get_mentor(self):
+        return self.mentor
+
 
 class Student(models.Model):
+    """
+        This model is used to create Student table with below fields
+    """
     student = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.ImageField(default='defaultimage.png', upload_to='profile_pics')
     alternate_number = models.CharField(max_length=13, default=None, null=True, blank=True)
@@ -38,6 +59,9 @@ class Student(models.Model):
 
 
 class Education(models.Model):
+    """
+        This model is used to create Education table with below fields
+    """
     student = models.OneToOneField(Student, on_delete=models.CASCADE)
     institute = models.CharField(max_length=50, default=None, null=True, blank=True)
     degree = models.CharField(max_length=50, default=None, null=True, blank=True)
@@ -48,6 +72,9 @@ class Education(models.Model):
 
 
 class StudentCourseMentor(models.Model):
+    """
+        This model is used to create StudentCourseMentor table with below fields
+    """
     student = models.OneToOneField(Student, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE)
@@ -56,6 +83,9 @@ class StudentCourseMentor(models.Model):
 
 
 class Performance(models.Model):
+    """
+        This model is used to create Performance table with below fields
+    """
     student = models.OneToOneField(Student, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     mentor = models.ForeignKey(Mentor, on_delete=models.SET_NULL, null=True)

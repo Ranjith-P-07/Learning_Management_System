@@ -3,6 +3,9 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
+    """
+        This model is used for create customized User details fields
+    """
     mobile_number = models.CharField(max_length=13, default=None, null=True, unique=True)
     role = models.CharField(
         choices=(
