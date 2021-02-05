@@ -28,7 +28,9 @@ class CoursesAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         """
-            Returns a list of all create courses
+            This function used for getting all the course
+            :param request: course
+            :return: returned all the courses
         """
         queryset = Course.objects.all()
         logger.info("Listed all courses, from get()")
@@ -36,7 +38,9 @@ class CoursesAPIView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         """
-            create a new course instance
+            This function is used for adding the course
+            :param request: course name and description
+            :return: Add the courses
         """
         serializer.save()
         logger.info("New course is created, from create()")
@@ -52,7 +56,10 @@ class CourseUpdateAPIView(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_update(self, serializer):
         """
-            Updating a course instance
+            This function is used for update the existing course
+            :param request: course name and description
+            :param course_id: course id
+            :return: update the particular course
         """
         serializer.save()
         logger.info("Course is Updated")
@@ -60,7 +67,10 @@ class CourseUpdateAPIView(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_destroy(self, instance):
         """
-            Deleting a course instance
+            This function is used for delete course with particular
+            :param request: course id
+            :param course_id: course id
+            :return: Delete the course
         """
         instance.delete()
         logger.info("Course is Deleted")
@@ -73,7 +83,7 @@ class MentorAPIView(generics.ListAPIView):
         Listing all mentor objects
     """
     serializer_class = MentorSerializer
-    permission_classes = (Admin_validate,)
+    permission_classes = (Mentor_validate,)
 
     queryset = Mentor.objects.all()
 
@@ -81,7 +91,7 @@ class MentorAPIView(generics.ListAPIView):
 @method_decorator(login_required(login_url='/user/login/'), name='dispatch')
 class MentorUpdateAPIView(GenericAPIView):
     serializer_class = MentorUpdateSerializer
-    permission_classes = (Admin_validate,)
+    permission_classes = (Mentor_validate,)
     queryset = Mentor.objects.all()
 
     def get(self, request, id):
@@ -138,7 +148,10 @@ class StudentPersonalDetailAPIView(GenericAPIView):
 
     def put(self, request, id):
         """
-            This method is used to update Student Personal data
+            This function is used for updating the student data
+            :param request: student personal details
+            :param student_id: student id
+            :return: update the student data
         """
         try:
             instance = self.queryset.get(id=id)
@@ -164,7 +177,9 @@ class StudentEducationAPIView(GenericAPIView):
 
     def get(self, request, id):
         """
-            This method is used to get Student Education Details
+            This function is used to getting student educational details
+            :param request: student educational details
+            :return: returned the student data
         """
         try:
             student = self.queryset.filter(id=id)
@@ -178,7 +193,11 @@ class StudentEducationAPIView(GenericAPIView):
             return Response({'response': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
 
     def put(self, request, id):
-
+        """
+            This function is used for updating the student educational details
+            :param request: student personal details
+            :return: update the student educational details
+        """
         try:
             instance = self.queryset.get(id=id)
             serializer = self.serializer_class(instance, data=request.data)
@@ -195,13 +214,16 @@ class StudentEducationAPIView(GenericAPIView):
 
 @method_decorator(login_required(login_url='/user/login/'), name='dispatch')
 class StudentCourseMentorMapAPIView(GenericAPIView):
+    """
+        This API is used to get student course mentor mapped records
+    """
     serializer_class = StudentCourseMentorSerializer
     permission_classes = (Admin_validate,)
     queryset = StudentCourseMentor.objects.all()
 
     def get(self, request):
         """
-            This API is used to get student course mentor mapped records
+            This function is used to get mentor, student, and course
         """
         serializer = StudentCourseMentorReadSerializer(self.queryset.all(), many=True)
         if not serializer.data:
@@ -212,7 +234,7 @@ class StudentCourseMentorMapAPIView(GenericAPIView):
 
     def post(self, request):
         """
-            This API is used to post student course mentor mapped record
+            This function is used to post student course mentor mapped record
         """
         serializer = self.serializer_class(data=request.data, context={'user': request.user})
         serializer.is_valid(raise_exception=True)
@@ -237,8 +259,8 @@ class StudentCourseMentorUpdateAPIView(GenericAPIView):
 
     def put(self, request, id):
         """
-            This API is used to update student course mentor mapping
-           @param request: Course id and mentor id
+            This function is used to update student course mentor mapping
+           @param request: Coursestudentmentor id
            @param record_id: record id of StudentCourseMentor model
            @return: updates record
         """
